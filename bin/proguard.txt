@@ -1,0 +1,6 @@
+# view AndroidManifest.xml #generated:8
+-keep class si.tpe.projecthor.MainActivity { <init>(...); }
+
+# onClick res/layout/main.xml #generated:41
+-keepclassmembers class * { *** launchConnection(...); }
+

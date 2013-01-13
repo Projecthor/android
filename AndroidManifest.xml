@@ -3,13 +3,19 @@
       package="si.tpe.projecthor"
       android:versionCode="1"
       android:versionName="1.0">
-    <application android:label="@string/app_name" android:icon="@drawable/ic_launcher">
-        <activity android:name="projecthor"
-                  android:label="@string/app_name">
+	<uses-sdk minSdkVersion="16" targetSdkVersion="16"/>
+    <application android:label="@string/app_name" android:icon="@drawable/ic_launcher" android:theme="@android:style/Theme.Holo.Light">
+        <activity android:name="MainActivity"
+                  android:label="@string/app_name"
+				  android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
+    
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    
 </manifest>

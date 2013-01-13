@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">projecthor</string>
+    <string name="app_name">ProjecThor</string>
+    <string-array name="difficultyArray">
+        <item>Facile</item>
+        <item>Moyen</item>
+        <item>Difficile</item>
+        <item>Divin</item>
+    </string-array>
 </resources>

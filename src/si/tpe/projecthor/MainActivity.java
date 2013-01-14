@@ -8,6 +8,9 @@ import android.widget.Spinner;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.view.View;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothAdapter;
@@ -18,14 +21,14 @@ import java.lang.Thread;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements OnItemSelectedListener {
 
 	// Déclaration de variables
 	
 	// Constantes
 	
 	private static final int SUCCEEDED = 1, FAILED = 0;
-	private static final String DEVICE_NAME = "ROBO TX-419"; // Le nom du périphérique bluetooth
+	private static final String DEVICE_NAME = "luc-arch-0"; // Le nom du périphérique bluetooth
 	private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // Sert à identifier l'application lors de la connexion bluetooth
 	
 	// Bluetooth
@@ -40,6 +43,7 @@ public class MainActivity extends Activity {
 	private Spinner difficultySpinner;
 	private EditText playerNumberEditText;
 	private TextView connexionState;
+	private long spinnerItem;
 	
 	// Méthode appelée au lancement de l'application
 	
@@ -76,9 +80,16 @@ public class MainActivity extends Activity {
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.difficultyArray, android.R.layout.simple_spinner_item);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		difficultySpinner.setAdapter(adapter);
+		difficultySpinner.setOnItemSelectedListener(this);
 	}
 
- 	
+	public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+		spinnerItem = id;
+		Toast.makeText(this, String.valueOf(spinnerItem), Toast.LENGTH_SHORT).show();
+	}
+
+	public void onNothingSelected(AdapterView<?> parent) { }
+
  	private Handler connexionHandler = new Handler() { // Récupère la réussite ou l'échec de la connexion bluetooth
 		@Override
 		public void handleMessage(Message msg) {
@@ -147,14 +158,6 @@ public class MainActivity extends Activity {
 
 		public void run() { }
 
-		public void sendCommand(String command) { // Envoie une commande via le socket
-			try {
-				command = "\rload /flash/" + command + ".bin\r"; // On adapte la commande
-				mmOutStream.write(command.getBytes());
-				mmOutStream.write(new String("run\r").getBytes());
-			} catch (IOException e) { }
-		}
-
 		public void write(String message) { // Sert à envoyer une commande brute, sans traitement
 			try {
 				mmOutStream.write(message.getBytes());
@@ -168,8 +171,9 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	public void launchconnexion(View view)
+	public void launchGame(View view)
 	{
-		
+		connectedThread.write(String.valueOf(spinnerItem));
+		setContentView(R.layout.player_round);
 	}
 }

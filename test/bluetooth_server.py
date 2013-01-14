@@ -28,6 +28,7 @@ while cont :
 		client_sock.sendall( str(score) )
 	elif data == "Quit":
 		print "Exiting"
+		cont = False
 	else:
 		print "Invalid command"
 

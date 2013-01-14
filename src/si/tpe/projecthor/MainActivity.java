@@ -48,12 +48,6 @@ public class MainActivity extends Activity {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.connecting);
     	
-    	// Initialisation de la liste des niveaux de difficulté
-		difficultySpinner = (Spinner)findViewById(R.id.difficultySpinner);
-		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.difficultyArray, android.R.layout.simple_spinner_item);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		//difficultySpinner.setAdapter(adapter);
-
 		playerNumberEditText = (EditText)findViewById(R.id.playerNumberEditText);
     	
     	connexionState = (TextView)findViewById(R.id.connexionState);
@@ -74,12 +68,23 @@ public class MainActivity extends Activity {
 			}
 		}
  	}
+	
+	// Initialisation de la liste des niveaux de difficulté
+
+	public void loadSpinner() {
+		difficultySpinner = (Spinner)findViewById(R.id.difficultySpinner);
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.difficultyArray, android.R.layout.simple_spinner_item);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		difficultySpinner.setAdapter(adapter);
+	}
+
  	
  	private Handler connexionHandler = new Handler() { // Récupère la réussite ou l'échec de la connexion bluetooth
 		@Override
 		public void handleMessage(Message msg) {
 			if(msg.what == SUCCEEDED) { // Si ça réussit
 				setContentView(R.layout.main); // On change d'interface
+				loadSpinner();
 				connexionStarted = true; // On indique le début de la connexion
 			}
 			if(msg.what == FAILED) { // Si ça échoue

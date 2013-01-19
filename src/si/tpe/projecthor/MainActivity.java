@@ -24,47 +24,54 @@ import java.io.OutputStream;
 public class MainActivity extends Activity implements OnItemSelectedListener {
 
 	// Déclaration de variables
-	
+
 	// Constantes
-	
+
 	private static final int SUCCEEDED = 1, FAILED = 0;
 	private static final String DEVICE_NAME = "luc-arch-0"; // Le nom du périphérique bluetooth
 	private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // Sert à identifier l'application lors de la connexion bluetooth
-	
+
 	// Bluetooth
-	
+
 	private BluetoothAdapter bluetoothAdapter;
 	private ConnectThread connectThread;
 	private ConnectedThread connectedThread;
 	private boolean connexionStarted = false;
-	
+
 	// GUI
-	
+
 	private Spinner difficultySpinner;
 	private EditText playerNumberEditText;
 	private TextView connexionState;
 	private Button playedButton;
 
 	private long spinnerItem;
-	
+
 	// Méthode appelée au lancement de l'application
-	
-    @Override
+
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
-    	super.onCreate(savedInstanceState);
-    	setContentView(R.layout.connecting);
-    	
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.connecting);
+
 		playerNumberEditText = (EditText)findViewById(R.id.playerNumberEditText);
+<<<<<<< HEAD
     	connexionState = (TextView)findViewById(R.id.connexionState);
 		playedButton = (Button)findViewById(R.id.playedButton);
     	
     	// On récupère l'accès au bluetooth
+=======
+
+		connexionState = (TextView)findViewById(R.id.connexionState);
+
+		// On récupère l'accès au bluetooth
+>>>>>>> 3d1a92ee5d9d9d014faa70e26704fbdc5ed2325c
 		bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if(!bluetoothAdapter.isEnabled()) { // On l'active si ce n'est pas déjà fait
 			bluetoothAdapter.enable();
 			while(!bluetoothAdapter.isEnabled()) { }
 		}
-		
+
 		Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices(); // On récupère la liste des périphériques bluetooth
 		for(BluetoothDevice device : pairedDevices) { // On cherche s'il y en a un qui correspond à celui qu'on cherche (DEVICE_NAME)
 			if(device.getName().equals(DEVICE_NAME)) {
@@ -73,8 +80,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 				connectThread.start(); // On le lance
 			}
 		}
- 	}
-	
+	}
+
 	// Initialisation de la liste des niveaux de difficulté
 
 	public void loadSpinner() {
@@ -94,9 +101,13 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
 	public void onNothingSelected(AdapterView<?> parent) { }
 
+<<<<<<< HEAD
 	// Récupère la réussite ou l'échec de la connexion bluetooth
 
  	private Handler connexionHandler = new Handler() { 
+=======
+	private Handler connexionHandler = new Handler() { // Récupère la réussite ou l'échec de la connexion bluetooth
+>>>>>>> 3d1a92ee5d9d9d014faa70e26704fbdc5ed2325c
 		@Override
 		public void handleMessage(Message msg) {
 			if(msg.what == SUCCEEDED) { // Si ça réussit
@@ -110,8 +121,11 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		}
 	};
 
+<<<<<<< HEAD
 	// Thread de connexion
 	
+=======
+>>>>>>> 3d1a92ee5d9d9d014faa70e26704fbdc5ed2325c
 	private class ConnectThread extends Thread { // Thread de connexion
 		private final BluetoothSocket mmSocket;
 		private final BluetoothDevice mmDevice;

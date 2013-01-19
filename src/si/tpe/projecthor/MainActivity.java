@@ -43,6 +43,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 	private Spinner difficultySpinner;
 	private EditText playerNumberEditText;
 	private TextView connexionState;
+	private Button playedButton;
+
 	private long spinnerItem;
 	
 	// Méthode appelée au lancement de l'application
@@ -53,8 +55,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
     	setContentView(R.layout.connecting);
     	
 		playerNumberEditText = (EditText)findViewById(R.id.playerNumberEditText);
-    	
     	connexionState = (TextView)findViewById(R.id.connexionState);
+		playedButton = (Button)findViewById(R.id.playedButton);
     	
     	// On récupère l'accès au bluetooth
 		bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -83,6 +85,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		difficultySpinner.setOnItemSelectedListener(this);
 	}
 
+	// Gestion de la difficulté sélectionnée
+
 	public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 		spinnerItem = id;
 		Toast.makeText(this, String.valueOf(spinnerItem), Toast.LENGTH_SHORT).show();
@@ -90,7 +94,9 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
 	public void onNothingSelected(AdapterView<?> parent) { }
 
- 	private Handler connexionHandler = new Handler() { // Récupère la réussite ou l'échec de la connexion bluetooth
+	// Récupère la réussite ou l'échec de la connexion bluetooth
+
+ 	private Handler connexionHandler = new Handler() { 
 		@Override
 		public void handleMessage(Message msg) {
 			if(msg.what == SUCCEEDED) { // Si ça réussit
@@ -103,6 +109,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 			}
 		}
 	};
+
+	// Thread de connexion
 	
 	private class ConnectThread extends Thread { // Thread de connexion
 		private final BluetoothSocket mmSocket;
@@ -141,6 +149,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		}
 	}
 
+	// Thread de gestion de la connexion
+
 	private class ConnectedThread extends Thread { // Thread de contrôle
 		private final BluetoothSocket mmSocket;
 		private final OutputStream mmOutStream;
@@ -171,9 +181,16 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		}
 	}
 
-	public void launchGame(View view)
-	{
+	// Callback du bouton launchButton
+
+	public void launchGame(View view) {
 		connectedThread.write(String.valueOf(spinnerItem));
 		setContentView(R.layout.player_round);
+	}
+
+	// TODO Callback du bouton playedButton
+
+	public void played(View view) {
+
 	}
 }

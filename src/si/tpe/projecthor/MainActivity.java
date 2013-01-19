@@ -55,17 +55,10 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		setContentView(R.layout.connecting);
 
 		playerNumberEditText = (EditText)findViewById(R.id.playerNumberEditText);
-<<<<<<< HEAD
     	connexionState = (TextView)findViewById(R.id.connexionState);
 		playedButton = (Button)findViewById(R.id.playedButton);
     	
-    	// On récupère l'accès au bluetooth
-=======
-
-		connexionState = (TextView)findViewById(R.id.connexionState);
-
 		// On récupère l'accès au bluetooth
->>>>>>> 3d1a92ee5d9d9d014faa70e26704fbdc5ed2325c
 		bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if(!bluetoothAdapter.isEnabled()) { // On l'active si ce n'est pas déjà fait
 			bluetoothAdapter.enable();
@@ -101,13 +94,9 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
 	public void onNothingSelected(AdapterView<?> parent) { }
 
-<<<<<<< HEAD
 	// Récupère la réussite ou l'échec de la connexion bluetooth
 
- 	private Handler connexionHandler = new Handler() { 
-=======
 	private Handler connexionHandler = new Handler() { // Récupère la réussite ou l'échec de la connexion bluetooth
->>>>>>> 3d1a92ee5d9d9d014faa70e26704fbdc5ed2325c
 		@Override
 		public void handleMessage(Message msg) {
 			if(msg.what == SUCCEEDED) { // Si ça réussit
@@ -121,11 +110,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		}
 	};
 
-<<<<<<< HEAD
 	// Thread de connexion
 	
-=======
->>>>>>> 3d1a92ee5d9d9d014faa70e26704fbdc5ed2325c
 	private class ConnectThread extends Thread { // Thread de connexion
 		private final BluetoothSocket mmSocket;
 		private final BluetoothDevice mmDevice;

@@ -7,6 +7,8 @@ import android.os.Message;
 import android.widget.Spinner;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Button;
+import android.widget.NumberPicker;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 import android.widget.AdapterView;
@@ -23,12 +25,12 @@ import java.io.OutputStream;
 
 public class MainActivity extends Activity implements OnItemSelectedListener {
 
-	// Déclaration de variables
+	// Déclarations de variables
 
 	// Constantes
 
 	private static final int SUCCEEDED = 1, FAILED = 0;
-	private static final String DEVICE_NAME = "luc-arch-0"; // Le nom du périphérique bluetooth
+	private static final String DEVICE_NAME = "ArchYvon-0"; // Le nom du périphérique bluetooth
 	private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // Sert à identifier l'application lors de la connexion bluetooth
 
 	// Bluetooth
@@ -40,12 +42,17 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
 	// GUI
 
-	private Spinner difficultySpinner;
-	private EditText playerNumberEditText;
 	private TextView connexionState;
+	private Spinner difficultySpinner;
+	private NumberPicker playerNumberPicker;
+	private EditText playerScoreEditText;
 	private Button playedButton;
 
-	private long spinnerItem;
+	private long difficultyID;
+	private int playerNumber;
+	private int playerScore;
+
+
 
 	// Méthode appelée au lancement de l'application
 
@@ -54,7 +61,6 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.connecting);
 
-		playerNumberEditText = (EditText)findViewById(R.id.playerNumberEditText);
     	connexionState = (TextView)findViewById(R.id.connexionState);
 		playedButton = (Button)findViewById(R.id.playedButton);
     	
@@ -75,9 +81,11 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		}
 	}
 
-	// Initialisation de la liste des niveaux de difficulté
 
-	public void loadSpinner() {
+
+	// Initialisation du difficultySpinner
+
+	public void loadDifficultySpinner() {
 		difficultySpinner = (Spinner)findViewById(R.id.difficultySpinner);
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.difficultyArray, android.R.layout.simple_spinner_item);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -85,14 +93,27 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		difficultySpinner.setOnItemSelectedListener(this);
 	}
 
+	// Initialisation du playerNumberPicker
+
+	public void loadPlayerNumberPicker() {
+		playerNumberPicker = (NumberPicker)findViewById(R.id.playerNumberPicker);
+		playerNumberPicker.setValue(1);
+		playerNumberPicker.setMinValue(1);
+		playerNumberPicker.setMaxValue(4);
+	}
+
 	// Gestion de la difficulté sélectionnée
 
 	public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-		spinnerItem = id;
-		Toast.makeText(this, String.valueOf(spinnerItem), Toast.LENGTH_SHORT).show();
+		difficultyID = id;
+		//Toast.makeText(this, String.valueOf(difficultyID), Toast.LENGTH_SHORT).show();
 	}
 
-	public void onNothingSelected(AdapterView<?> parent) { }
+	public void onNothingSelected(AdapterView<?> parent) {
+			
+	}
+
+
 
 	// Récupère la réussite ou l'échec de la connexion bluetooth
 
@@ -101,7 +122,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		public void handleMessage(Message msg) {
 			if(msg.what == SUCCEEDED) { // Si ça réussit
 				setContentView(R.layout.main); // On change d'interface
-				loadSpinner();
+				loadDifficultySpinner();
+				loadPlayerNumberPicker();
 				connexionStarted = true; // On indique le début de la connexion
 			}
 			if(msg.what == FAILED) { // Si ça échoue
@@ -109,6 +131,25 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 			}
 		}
 	};
+
+	// Callback du bouton launchButton
+
+	public void launchGame(View view) {
+		connectedThread.write(String.valueOf(difficultyID)); // On envoie le niveau de difficulté
+		playerNumber = playerNumberPicker.getValue();
+		setContentView(R.layout.player_round);
+		playerScoreEditText = (EditText)findViewById(R.id.playerScoreEditText);
+	}
+
+	// Callback du bouton playedButton
+
+	public void played(View view) {
+		connectedThread.write("compute"); // On envoie l'ordre de calculer puis préparer la trajectoire du projectile
+		playerScore += Integer.parseInt(playerScoreEditText.getText().toString());
+		setContentView(R.layout.robot_loading);
+	}
+
+
 
 	// Thread de connexion
 	
@@ -179,18 +220,5 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 				mmSocket.close(); // On ferme le socket
 			} catch (IOException e) { }
 		}
-	}
-
-	// Callback du bouton launchButton
-
-	public void launchGame(View view) {
-		connectedThread.write(String.valueOf(spinnerItem));
-		setContentView(R.layout.player_round);
-	}
-
-	// TODO Callback du bouton playedButton
-
-	public void played(View view) {
-
 	}
 }

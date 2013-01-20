@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7 
+#!/usr/bin/python2.7
 # -*-coding:Utf-8 -*
 
 from bluetooth import *

@@ -4,21 +4,21 @@
 	android:layout_height="fill_parent"
 	android:orientation="vertical"
 	android:gravity="center"
-	android:padding="40dp"
+	android:padding="30dp"
 	>
 	<TextView
 		android:text="Niveau de difficulté :"
 		android:textSize="18dp"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_marginBottom="15dp"
+		android:layout_marginBottom="10dp"
 		android:layout_gravity="center_horizontal"
 		/>
 	<Spinner
 		android:id="@+id/difficultySpinner"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:layout_marginBottom="30dp"
+		android:layout_marginBottom="20dp"
 		android:layout_gravity="center_horizontal"
 		/>
 	<TextView
@@ -26,16 +26,14 @@
 		android:textSize="18dp"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_marginBottom="15dp"
+		android:layout_marginBottom="10dp"
 		android:layout_gravity="center_horizontal"
 		/>
-	<EditText
-		android:id="@+id/playerNumberEditText"
-		android:numeric="integer"
-		android:text="1"
+	<NumberPicker
+		android:id="@+id/playerNumberPicker"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_marginBottom="50dp"
+		android:layout_marginBottom="10dp"
 		android:layout_gravity="center_horizontal"
 		/>
 	<Button

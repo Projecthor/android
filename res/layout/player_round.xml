@@ -53,13 +53,13 @@
 		android:orientation="vertical"
 		>
 		<TextView
-			android:id="@+id/remainingShotsTextView1"
+			android:id="@+id/remainingShotsTextView"
 			android:text="Tirs restants : "
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			/>
 		<TextView
-			android:id="@+id/totalScoreTextView1"
+			android:id="@+id/totalScoreTextView"
 			android:text="Score : "
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"

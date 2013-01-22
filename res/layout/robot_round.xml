@@ -25,6 +25,7 @@
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal"
 			android:layout_marginBottom="60dp"
+			android:onClick="fire"
 			/>
 		<TextView
 			android:text="Ne pas passer devant le robot lors du tir !"
@@ -45,14 +46,12 @@
 		android:layout_alignParentBottom="true"
 		>
 		<TextView
-			android:id="@+id/remainingShotsTextView3"
-			android:text="Tirs restants : "
+			android:id="@id/remainingShotsTextView"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			/>
 		<TextView
-			android:id="@+id/totalScoreTextView3"
-			android:text="Score : "
+			android:id="@id/totalScoreTextView"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			/>

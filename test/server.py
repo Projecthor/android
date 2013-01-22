@@ -15,7 +15,10 @@ print "Connexion de", client_info
 
 while True :
 	data = client_sock.recv(1024)
-	print data 
+	print data
+	if data == "compute" :
+		print "Prêt"
+		client_sock.sendall("ready")
 
 client_sock.close()
 server_sock.close()

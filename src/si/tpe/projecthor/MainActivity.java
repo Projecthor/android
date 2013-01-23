@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.lang.Thread;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 public class MainActivity extends Activity implements OnItemSelectedListener {
@@ -29,7 +30,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
 	// Constantes
 
-	private static final int SUCCEEDED = 1, FAILED = 0;
+	private static final int SUCCEEDED = 1, FAILED = 0, MESSAGE_READ = 2;
 	private static final String DEVICE_NAME = "ArchYvon-0"; // Le nom du périphérique bluetooth
 	private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // Sert à identifier l'application lors de la connexion bluetooth
 
@@ -43,14 +44,17 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 	// GUI
 
 	private TextView connexionState;
+	private TextView totalScoreTextView;
+	private TextView remainingShotsTextView;
 	private Spinner difficultySpinner;
 	private NumberPicker playerNumberPicker;
 	private EditText playerScoreEditText;
-	private Button playedButton;
 
 	private long difficultyID;
 	private int playerNumber;
 	private int playerScore;
+	private int robotScore;
+	private int remainingShots = 3;
 
 
 
@@ -62,7 +66,6 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		setContentView(R.layout.connecting);
 
     	connexionState = (TextView)findViewById(R.id.connexionState);
-		playedButton = (Button)findViewById(R.id.playedButton);
     	
 		// On récupère l'accès au bluetooth
 		bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -102,6 +105,15 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		playerNumberPicker.setMaxValue(4);
 	}
 
+	// Rafraîchir le score total et le nombre de tirs restants
+
+	public void refreshScore() {
+		remainingShotsTextView = (TextView)findViewById(R.id.remainingShotsTextView);
+		remainingShotsTextView.setText("Tirs restants : " + String.valueOf(remainingShots));
+    	totalScoreTextView = (TextView)findViewById(R.id.totalScoreTextView);
+		totalScoreTextView.setText("Score total : " + String.valueOf(playerScore) + " - " + String.valueOf(robotScore));
+	}
+
 	// Gestion de la difficulté sélectionnée
 
 	public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
@@ -113,21 +125,37 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 			
 	}
 
+	// Afficher la vue player_round
+
+	public void displayPlayerRound() {
+		setContentView(R.layout.player_round);
+		playerScoreEditText = (EditText)findViewById(R.id.playerScoreEditText);
+		refreshScore();
+	}
 
 
-	// Récupère la réussite ou l'échec de la connexion bluetooth
 
-	private Handler connexionHandler = new Handler() { // Récupère la réussite ou l'échec de la connexion bluetooth
+	// Permet de gérer la connexion
+
+	private Handler connexionHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			if(msg.what == SUCCEEDED) { // Si ça réussit
+			switch(msg.what) {
+			case SUCCEEDED : // Si ça réussit
 				setContentView(R.layout.main); // On change d'interface
 				loadDifficultySpinner();
 				loadPlayerNumberPicker();
 				connexionStarted = true; // On indique le début de la connexion
-			}
-			if(msg.what == FAILED) { // Si ça échoue
+				break;
+			case FAILED : // Si ça échoue
 				connexionState.setText("Connexion échouée"); // On l'indique
+				break;
+			case MESSAGE_READ : // Si un message est reçu
+				byte[] buffer = (byte[])msg.obj;
+				String messageRead = new String(buffer, 0, msg.arg1);
+				setContentView(R.layout.robot_round); // On change d'interface
+				refreshScore();
+				break;
 			}
 		}
 	};
@@ -137,16 +165,31 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 	public void launchGame(View view) {
 		connectedThread.write(String.valueOf(difficultyID)); // On envoie le niveau de difficulté
 		playerNumber = playerNumberPicker.getValue();
-		setContentView(R.layout.player_round);
-		playerScoreEditText = (EditText)findViewById(R.id.playerScoreEditText);
+		displayPlayerRound();
 	}
 
 	// Callback du bouton playedButton
 
 	public void played(View view) {
-		connectedThread.write("compute"); // On envoie l'ordre de calculer puis préparer la trajectoire du projectile
+		remainingShots--;
 		playerScore += Integer.parseInt(playerScoreEditText.getText().toString());
+
 		setContentView(R.layout.robot_loading);
+		refreshScore();
+
+		connectedThread.write("compute"); // On envoie l'ordre de calculer puis préparer la trajectoire du projectile
+	}
+
+	// Callback du bouton fireButton
+
+	public void fire(View view) {
+		connectedThread.write("fire"); // On envoie l'ordre de tirer
+		if(remainingShots != 0) {
+			displayPlayerRound();
+		}
+		else {
+			setContentView(R.layout.game_over);
+		}
 	}
 
 
@@ -194,20 +237,36 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
 	private class ConnectedThread extends Thread { // Thread de contrôle
 		private final BluetoothSocket mmSocket;
+		private final InputStream mmInStream;
 		private final OutputStream mmOutStream;
 
 		public ConnectedThread(BluetoothSocket socket) {
 			mmSocket = socket;
+			InputStream tmpIn = null;
 			OutputStream tmpOut = null;
 
 			try {
-				tmpOut = socket.getOutputStream(); // Ouvre un flux sur le socket passé en paramètre
+				tmpIn = socket.getInputStream(); // Ouvre un flux entrant sur le socket passé en paramètre
+				tmpOut = socket.getOutputStream(); // Ouvre un flux sortant sur le socket passé en paramètre
 			} catch (IOException e) { }
 
+			mmInStream = tmpIn;
 			mmOutStream = tmpOut;
 		}
 
-		public void run() { }
+		public void run() {
+			byte[] buffer = new byte[1024];  // buffer store for the stream
+			int bytes; // bytes returned from read()
+		 
+			while (true) {
+				try {
+					bytes = mmInStream.read(buffer);
+					connexionHandler.sendMessage(connexionHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer));
+				} catch (IOException e) {
+					break;
+				}
+			}
+		}
 
 		public void write(String message) { // Sert à envoyer une commande brute, sans traitement
 			try {

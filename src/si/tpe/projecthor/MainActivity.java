@@ -64,8 +64,8 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.connecting);
-
-    	connexionState = (TextView)findViewById(R.id.connexionState);
+		
+		connexionState = (TextView)findViewById(R.id.connexionState);
     	
 		// On récupère l'accès au bluetooth
 		bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -110,7 +110,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 	public void refreshScore() {
 		remainingShotsTextView = (TextView)findViewById(R.id.remainingShotsTextView);
 		remainingShotsTextView.setText("Tirs restants : " + String.valueOf(remainingShots));
-    	totalScoreTextView = (TextView)findViewById(R.id.totalScoreTextView);
+		totalScoreTextView = (TextView)findViewById(R.id.totalScoreTextView);
 		totalScoreTextView.setText("Score total : " + String.valueOf(playerScore) + " - " + String.valueOf(robotScore));
 	}
 

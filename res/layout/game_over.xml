@@ -21,6 +21,7 @@
 			android:gravity="center"
 			/>
 		<TextView
+			android:id="@+id/finalScoreTextView"
 			android:text="Score final : 10 - 3"
 			android:textSize="16dp"
 			android:layout_width="wrap_content"
@@ -34,13 +35,15 @@
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal"
+			android:onClick="replay"
 			/>
 		<Button
-			android:id="@+id/leaveButton"
+			android:id="@+id/quitButton"
 			android:text="Quitter"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal"
+			android:onClick="quit"
 			/>
 	</LinearLayout>
 </RelativeLayout>

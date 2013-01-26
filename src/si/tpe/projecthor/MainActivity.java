@@ -39,13 +39,14 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 	private BluetoothAdapter bluetoothAdapter;
 	private ConnectThread connectThread;
 	private ConnectedThread connectedThread;
-	private boolean connexionStarted = false;
 
 	// GUI
 
 	private TextView connexionState;
 	private TextView totalScoreTextView;
 	private TextView remainingShotsTextView;
+	private TextView winLoseTextView;
+	private TextView finalScoreTextView;
 	private Spinner difficultySpinner;
 	private NumberPicker playerNumberPicker;
 	private EditText playerScoreEditText;
@@ -83,26 +84,32 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 			}
 		}
 	}
+	
 
 
+	// Afficher la vue main
 
-	// Initialisation du difficultySpinner
+	public void displayMain() {
+		setContentView(R.layout.main);
 
-	public void loadDifficultySpinner() {
 		difficultySpinner = (Spinner)findViewById(R.id.difficultySpinner);
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.difficultyArray, android.R.layout.simple_spinner_item);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		difficultySpinner.setAdapter(adapter);
 		difficultySpinner.setOnItemSelectedListener(this);
-	}
 
-	// Initialisation du playerNumberPicker
-
-	public void loadPlayerNumberPicker() {
 		playerNumberPicker = (NumberPicker)findViewById(R.id.playerNumberPicker);
 		playerNumberPicker.setValue(1);
 		playerNumberPicker.setMinValue(1);
 		playerNumberPicker.setMaxValue(4);
+	}
+
+	// Afficher la vue player_round
+
+	public void displayPlayerRound() {
+		setContentView(R.layout.player_round);
+		playerScoreEditText = (EditText)findViewById(R.id.playerScoreEditText);
+		refreshScore();
 	}
 
 	// Rafraîchir le score total et le nombre de tirs restants
@@ -121,17 +128,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		//Toast.makeText(this, String.valueOf(difficultyID), Toast.LENGTH_SHORT).show();
 	}
 
-	public void onNothingSelected(AdapterView<?> parent) {
-			
-	}
-
-	// Afficher la vue player_round
-
-	public void displayPlayerRound() {
-		setContentView(R.layout.player_round);
-		playerScoreEditText = (EditText)findViewById(R.id.playerScoreEditText);
-		refreshScore();
-	}
+	public void onNothingSelected(AdapterView<?> parent) { }
 
 
 
@@ -142,10 +139,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		public void handleMessage(Message msg) {
 			switch(msg.what) {
 			case SUCCEEDED : // Si ça réussit
-				setContentView(R.layout.main); // On change d'interface
-				loadDifficultySpinner();
-				loadPlayerNumberPicker();
-				connexionStarted = true; // On indique le début de la connexion
+				displayMain();
 				break;
 			case FAILED : // Si ça échoue
 				connexionState.setText("Connexion échouée"); // On l'indique
@@ -189,7 +183,32 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		}
 		else {
 			setContentView(R.layout.game_over);
+
+			winLoseTextView = (TextView)findViewById(R.id.winLoseTextView);
+			if(playerScore > robotScore) {
+				winLoseTextView.setText("Bien joué, vous avez gagné !");
+			}
+			else if(playerScore < robotScore) {
+				winLoseTextView.setText("Dommage, vous avez perdu.");
+			}
+			else {
+				winLoseTextView.setText("Égalité : vous êtes tenace !");
+			}
+
+			finalScoreTextView = (TextView)findViewById(R.id.finalScoreTextView);
+			finalScoreTextView.setText(totalScoreTextView.getText());
 		}
+	}
+
+	public void replay() {
+		//displayMain();
+		remainingShots = 3;
+		playerScore = 0;
+		robotScore = 0;
+	}
+
+	public void quit() {
+		finish();
 	}
 
 

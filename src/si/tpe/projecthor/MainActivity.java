@@ -31,7 +31,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 	// Constantes
 
 	private static final int SUCCEEDED = 1, FAILED = 0, MESSAGE_READ = 2;
-	private static final String DEVICE_NAME = "ArchYvon-0"; // Le nom du périphérique bluetooth
+	private static final String DEVICE_NAME = "Prjecthr01"; // Le nom du périphérique bluetooth
 	private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // Sert à identifier l'application lors de la connexion bluetooth
 
 	// Bluetooth
@@ -48,11 +48,10 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 	private TextView winLoseTextView;
 	private TextView finalScoreTextView;
 	private Spinner difficultySpinner;
-	private NumberPicker playerNumberPicker;
-	private EditText playerScoreEditText;
+	private NumberPicker playerScoreNumberPicker;
+	private Button reconnectButton;
 
 	private long difficultyID;
-	private int playerNumber;
 	private int playerScore;
 	private int robotScore;
 	private int remainingShots = 3;
@@ -67,6 +66,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		setContentView(R.layout.connecting);
 		
 		connexionState = (TextView)findViewById(R.id.connexionState);
+		reconnectButton = (Button)findViewById(R.id.reconnectButton);
     	
 		// On récupère l'accès au bluetooth
 		bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -75,6 +75,10 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 			while(!bluetoothAdapter.isEnabled()) { }
 		}
 
+		launchConnexion();
+	}
+
+	public void launchConnexion() {
 		Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices(); // On récupère la liste des périphériques bluetooth
 		for(BluetoothDevice device : pairedDevices) { // On cherche s'il y en a un qui correspond à celui qu'on cherche (DEVICE_NAME)
 			if(device.getName().equals(DEVICE_NAME)) {
@@ -97,18 +101,18 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		difficultySpinner.setAdapter(adapter);
 		difficultySpinner.setOnItemSelectedListener(this);
-
-		playerNumberPicker = (NumberPicker)findViewById(R.id.playerNumberPicker);
-		playerNumberPicker.setValue(1);
-		playerNumberPicker.setMinValue(1);
-		playerNumberPicker.setMaxValue(4);
 	}
 
 	// Afficher la vue player_round
 
 	public void displayPlayerRound() {
 		setContentView(R.layout.player_round);
-		playerScoreEditText = (EditText)findViewById(R.id.playerScoreEditText);
+
+		playerScoreNumberPicker = (NumberPicker)findViewById(R.id.playerScoreNumberPicker);
+		playerScoreNumberPicker.setValue(0);
+		playerScoreNumberPicker.setMinValue(0);
+		playerScoreNumberPicker.setMaxValue(10);
+
 		refreshScore();
 	}
 
@@ -125,7 +129,6 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
 	public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 		difficultyID = id;
-		//Toast.makeText(this, String.valueOf(difficultyID), Toast.LENGTH_SHORT).show();
 	}
 
 	public void onNothingSelected(AdapterView<?> parent) { }
@@ -143,22 +146,56 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 				break;
 			case FAILED : // Si ça échoue
 				connexionState.setText("Connexion échouée"); // On l'indique
+				reconnectButton.setVisibility(View.VISIBLE);
 				break;
 			case MESSAGE_READ : // Si un message est reçu
 				byte[] buffer = (byte[])msg.obj;
 				String messageRead = new String(buffer, 0, msg.arg1);
-				setContentView(R.layout.robot_round); // On change d'interface
-				refreshScore();
+				if(messageRead.contains("r")) { // Si le robot est prêt à tirer
+					setContentView(R.layout.robot_round); // On change d'interface
+					refreshScore();
+				}
+				else { // Sinon le message est le score effectué par le robot
+					robotScore += Integer.parseInt(messageRead);
+					refreshScore();
+					if(remainingShots > 0) {
+						displayPlayerRound();
+					}
+					else {
+						setContentView(R.layout.game_over);
+
+						winLoseTextView = (TextView)findViewById(R.id.winLoseTextView);
+						if(playerScore > robotScore) {
+							winLoseTextView.setText("Bien joué, vous avez gagné !");
+						}
+						else if(playerScore < robotScore) {
+							winLoseTextView.setText("Dommage, vous avez perdu.");
+						}
+						else {
+							winLoseTextView.setText("Égalité : vous êtes tenace !");
+						}
+
+						finalScoreTextView = (TextView)findViewById(R.id.finalScoreTextView);
+						finalScoreTextView.setText(totalScoreTextView.getText());
+					}
+				}
 				break;
 			}
 		}
 	};
 
+	// Callback du bouton reconnectButton
+
+	public void reconnect(View view) {
+		reconnectButton.setVisibility(View.GONE);
+		connexionState.setText("Connexion en cours...");
+		launchConnexion();
+	}
+
 	// Callback du bouton launchButton
 
 	public void launchGame(View view) {
 		connectedThread.write(String.valueOf(difficultyID)); // On envoie le niveau de difficulté
-		playerNumber = playerNumberPicker.getValue();
 		displayPlayerRound();
 	}
 
@@ -166,48 +203,34 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
 	public void played(View view) {
 		remainingShots--;
-		playerScore += Integer.parseInt(playerScoreEditText.getText().toString());
+		playerScore += playerScoreNumberPicker.getValue();
 
 		setContentView(R.layout.robot_loading);
 		refreshScore();
 
-		connectedThread.write("compute"); // On envoie l'ordre de calculer puis préparer la trajectoire du projectile
+		connectedThread.write("c"); // On envoie l'ordre de calculer puis préparer la trajectoire du projectile
 	}
 
 	// Callback du bouton fireButton
 
 	public void fire(View view) {
-		connectedThread.write("fire"); // On envoie l'ordre de tirer
-		if(remainingShots != 0) {
-			displayPlayerRound();
-		}
-		else {
-			setContentView(R.layout.game_over);
-
-			winLoseTextView = (TextView)findViewById(R.id.winLoseTextView);
-			if(playerScore > robotScore) {
-				winLoseTextView.setText("Bien joué, vous avez gagné !");
-			}
-			else if(playerScore < robotScore) {
-				winLoseTextView.setText("Dommage, vous avez perdu.");
-			}
-			else {
-				winLoseTextView.setText("Égalité : vous êtes tenace !");
-			}
-
-			finalScoreTextView = (TextView)findViewById(R.id.finalScoreTextView);
-			finalScoreTextView.setText(totalScoreTextView.getText());
-		}
+		connectedThread.write("f"); // On envoie l'ordre de tirer
 	}
 
-	public void replay() {
-		//displayMain();
+	// Callback du bouton replayButton
+
+	public void replay(View view) {
+		displayMain();
 		remainingShots = 3;
 		playerScore = 0;
 		robotScore = 0;
 	}
 
-	public void quit() {
+	// Callback du bouton quitButton
+
+	public void quit(View view) {
+		connectThread.cancel();
+		connectedThread.cancel();
 		finish();
 	}
 

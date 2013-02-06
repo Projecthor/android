@@ -3,11 +3,21 @@
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
 	android:gravity="center"
+	android:orientation="vertical"
 	>
 	<TextView
 		android:id="@+id/connexionState"
 		android:textSize="20dp"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
+		android:layout_marginBottom="30dp"
+		/>
+	<Button
+		android:id="@+id/reconnectButton"
+		android:text="Réessayer"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:onClick="reconnect"
+		android:visibility="gone"
 		/>
 </LinearLayout>

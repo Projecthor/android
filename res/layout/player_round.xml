@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
-	android:padding="40dp"
+	android:padding="20dp"
 	>
 	<LinearLayout 
 		android:layout_width="wrap_content"
@@ -12,28 +12,26 @@
 		>
 		<TextView
 			android:text="À vous de jouer !"
-			android:textSize="20dp"
+			android:textSize="18dp"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginBottom="30dp"
+			android:layout_marginBottom="20dp"
 			android:layout_gravity="center_horizontal"
 			/>
 		<TextView
 			android:text="Votre score :"
-			android:textSize="16dp"
+			android:textSize="15dp"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal"
-			android:layout_marginBottom="30dp"
+			android:layout_marginBottom="15dp"
 			/>
-		<EditText
-			android:id="@+id/playerScoreEditText"
-			android:numeric="integer"
-			android:text="100"
+		<NumberPicker
+			android:id="@+id/playerScoreNumberPicker"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal"
-			android:layout_marginBottom="40dp"
+			android:layout_marginBottom="15dp"
 			/>
 		<Button
 			android:id="@+id/playedButton"
@@ -41,7 +39,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal"
-			android:layout_marginBottom="40dp"
+			android:layout_marginBottom="30dp"
 			android:onClick="played"
 			/>
 	</LinearLayout>

@@ -111,7 +111,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		playerScoreNumberPicker = (NumberPicker)findViewById(R.id.playerScoreNumberPicker);
 		playerScoreNumberPicker.setValue(0);
 		playerScoreNumberPicker.setMinValue(0);
-		playerScoreNumberPicker.setMaxValue(10);
+		playerScoreNumberPicker.setMaxValue(9);
 
 		refreshScore();
 	}
@@ -161,11 +161,18 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 					if(remainingShots > 0) {
 						displayPlayerRound();
 					}
-					else {
+					else { // Si la partie est finie
+						connectedThread.write("e");
 						setContentView(R.layout.game_over);
 
 						winLoseTextView = (TextView)findViewById(R.id.winLoseTextView);
-						if(playerScore > robotScore) {
+						if(playerScore == 0) {
+							winLoseTextView.setText("Essayez au moins de toucher la cible...");
+						}
+						else if(playerScore == 27) {
+							winLoseTextView.setText("Épique !");
+						}
+						else if(playerScore > robotScore) {
 							winLoseTextView.setText("Bien joué, vous avez gagné !");
 						}
 						else if(playerScore < robotScore) {

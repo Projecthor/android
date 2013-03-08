@@ -7,6 +7,8 @@ import android.os.Message;
 import android.widget.Spinner;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Button;
+import android.widget.NumberPicker;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 import android.widget.AdapterView;
@@ -19,16 +21,17 @@ import java.util.Set;
 import java.util.UUID;
 import java.lang.Thread;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 public class MainActivity extends Activity implements OnItemSelectedListener {
 
-	// Déclaration de variables
+	// Déclarations de variables
 
 	// Constantes
 
-	private static final int SUCCEEDED = 1, FAILED = 0;
-	private static final String DEVICE_NAME = "luc-arch-0"; // Le nom du périphérique bluetooth
+	private static final int SUCCEEDED = 1, FAILED = 0, MESSAGE_READ = 2;
+	private static final String DEVICE_NAME = "Prjecthr01"; // Le nom du périphérique bluetooth
 	private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // Sert à identifier l'application lors de la connexion bluetooth
 
 	// Bluetooth
@@ -36,14 +39,24 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 	private BluetoothAdapter bluetoothAdapter;
 	private ConnectThread connectThread;
 	private ConnectedThread connectedThread;
-	private boolean connexionStarted = false;
 
 	// GUI
 
-	private Spinner difficultySpinner;
-	private EditText playerNumberEditText;
 	private TextView connexionState;
-	private long spinnerItem;
+	private TextView totalScoreTextView;
+	private TextView remainingShotsTextView;
+	private TextView winLoseTextView;
+	private TextView finalScoreTextView;
+	private Spinner difficultySpinner;
+	private NumberPicker playerScoreNumberPicker;
+	private Button reconnectButton;
+
+	private long difficultyID;
+	private int playerScore;
+	private int robotScore;
+	private int remainingShots = 3;
+
+
 
 	// Méthode appelée au lancement de l'application
 
@@ -51,11 +64,10 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.connecting);
-
-		playerNumberEditText = (EditText)findViewById(R.id.playerNumberEditText);
-
+		
 		connexionState = (TextView)findViewById(R.id.connexionState);
-
+		reconnectButton = (Button)findViewById(R.id.reconnectButton);
+    	
 		// On récupère l'accès au bluetooth
 		bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if(!bluetoothAdapter.isEnabled()) { // On l'active si ce n'est pas déjà fait
@@ -63,6 +75,10 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 			while(!bluetoothAdapter.isEnabled()) { }
 		}
 
+		launchConnexion();
+	}
+
+	public void launchConnexion() {
 		Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices(); // On récupère la liste des périphériques bluetooth
 		for(BluetoothDevice device : pairedDevices) { // On cherche s'il y en a un qui correspond à celui qu'on cherche (DEVICE_NAME)
 			if(device.getName().equals(DEVICE_NAME)) {
@@ -72,10 +88,14 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 			}
 		}
 	}
+	
 
-	// Initialisation de la liste des niveaux de difficulté
 
-	public void loadSpinner() {
+	// Afficher la vue main
+
+	public void displayMain() {
+		setContentView(R.layout.main);
+
 		difficultySpinner = (Spinner)findViewById(R.id.difficultySpinner);
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.difficultyArray, android.R.layout.simple_spinner_item);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -83,27 +103,148 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		difficultySpinner.setOnItemSelectedListener(this);
 	}
 
+	// Afficher la vue player_round
+
+	public void displayPlayerRound() {
+		setContentView(R.layout.player_round);
+
+		playerScoreNumberPicker = (NumberPicker)findViewById(R.id.playerScoreNumberPicker);
+		playerScoreNumberPicker.setValue(0);
+		playerScoreNumberPicker.setMinValue(0);
+		playerScoreNumberPicker.setMaxValue(9);
+
+		refreshScore();
+	}
+
+	// Rafraîchir le score total et le nombre de tirs restants
+
+	public void refreshScore() {
+		remainingShotsTextView = (TextView)findViewById(R.id.remainingShotsTextView);
+		remainingShotsTextView.setText("Tirs restants : " + String.valueOf(remainingShots));
+		totalScoreTextView = (TextView)findViewById(R.id.totalScoreTextView);
+		totalScoreTextView.setText("Score total : " + String.valueOf(playerScore) + " - " + String.valueOf(robotScore));
+	}
+
+	// Gestion de la difficulté sélectionnée
+
 	public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-		spinnerItem = id;
-		Toast.makeText(this, String.valueOf(spinnerItem), Toast.LENGTH_SHORT).show();
+		difficultyID = id;
 	}
 
 	public void onNothingSelected(AdapterView<?> parent) { }
 
-	private Handler connexionHandler = new Handler() { // Récupère la réussite ou l'échec de la connexion bluetooth
+
+
+	// Permet de gérer la connexion
+
+	private Handler connexionHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			if(msg.what == SUCCEEDED) { // Si ça réussit
-				setContentView(R.layout.main); // On change d'interface
-				loadSpinner();
-				connexionStarted = true; // On indique le début de la connexion
-			}
-			if(msg.what == FAILED) { // Si ça échoue
+			switch(msg.what) {
+			case SUCCEEDED : // Si ça réussit
+				displayMain();
+				break;
+			case FAILED : // Si ça échoue
 				connexionState.setText("Connexion échouée"); // On l'indique
+				reconnectButton.setVisibility(View.VISIBLE);
+				break;
+			case MESSAGE_READ : // Si un message est reçu
+				byte[] buffer = (byte[])msg.obj;
+				String messageRead = new String(buffer, 0, msg.arg1);
+				if(messageRead.contains("r")) { // Si le robot est prêt à tirer
+					setContentView(R.layout.robot_round); // On change d'interface
+					refreshScore();
+				}
+				else { // Sinon le message est le score effectué par le robot
+					robotScore += Integer.parseInt(messageRead);
+					refreshScore();
+					if(remainingShots > 0) {
+						displayPlayerRound();
+					}
+					else { // Si la partie est finie
+						connectedThread.write("e");
+						setContentView(R.layout.game_over);
+
+						winLoseTextView = (TextView)findViewById(R.id.winLoseTextView);
+						if(playerScore == 0) {
+							winLoseTextView.setText("Essayez au moins de toucher la cible...");
+						}
+						else if(playerScore == 27) {
+							winLoseTextView.setText("Épique !");
+						}
+						else if(playerScore > robotScore) {
+							winLoseTextView.setText("Bien joué, vous avez gagné !");
+						}
+						else if(playerScore < robotScore) {
+							winLoseTextView.setText("Dommage, vous avez perdu.");
+						}
+						else {
+							winLoseTextView.setText("Égalité : vous êtes tenace !");
+						}
+
+						finalScoreTextView = (TextView)findViewById(R.id.finalScoreTextView);
+						finalScoreTextView.setText(totalScoreTextView.getText());
+					}
+				}
+				break;
 			}
 		}
 	};
 
+	// Callback du bouton reconnectButton
+
+	public void reconnect(View view) {
+		reconnectButton.setVisibility(View.GONE);
+		connexionState.setText("Connexion en cours...");
+		launchConnexion();
+	}
+
+	// Callback du bouton launchButton
+
+	public void launchGame(View view) {
+		connectedThread.write(String.valueOf(difficultyID)); // On envoie le niveau de difficulté
+		displayPlayerRound();
+	}
+
+	// Callback du bouton playedButton
+
+	public void played(View view) {
+		remainingShots--;
+		playerScore += playerScoreNumberPicker.getValue();
+
+		setContentView(R.layout.robot_loading);
+		refreshScore();
+
+		connectedThread.write("c"); // On envoie l'ordre de calculer puis préparer la trajectoire du projectile
+	}
+
+	// Callback du bouton fireButton
+
+	public void fire(View view) {
+		connectedThread.write("f"); // On envoie l'ordre de tirer
+	}
+
+	// Callback du bouton replayButton
+
+	public void replay(View view) {
+		displayMain();
+		remainingShots = 3;
+		playerScore = 0;
+		robotScore = 0;
+	}
+
+	// Callback du bouton quitButton
+
+	public void quit(View view) {
+		connectThread.cancel();
+		connectedThread.cancel();
+		finish();
+	}
+
+
+
+	// Thread de connexion
+	
 	private class ConnectThread extends Thread { // Thread de connexion
 		private final BluetoothSocket mmSocket;
 		private final BluetoothDevice mmDevice;
@@ -141,22 +282,40 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		}
 	}
 
+	// Thread de gestion de la connexion
+
 	private class ConnectedThread extends Thread { // Thread de contrôle
 		private final BluetoothSocket mmSocket;
+		private final InputStream mmInStream;
 		private final OutputStream mmOutStream;
 
 		public ConnectedThread(BluetoothSocket socket) {
 			mmSocket = socket;
+			InputStream tmpIn = null;
 			OutputStream tmpOut = null;
 
 			try {
-				tmpOut = socket.getOutputStream(); // Ouvre un flux sur le socket passé en paramètre
+				tmpIn = socket.getInputStream(); // Ouvre un flux entrant sur le socket passé en paramètre
+				tmpOut = socket.getOutputStream(); // Ouvre un flux sortant sur le socket passé en paramètre
 			} catch (IOException e) { }
 
+			mmInStream = tmpIn;
 			mmOutStream = tmpOut;
 		}
 
-		public void run() { }
+		public void run() {
+			byte[] buffer = new byte[1024];  // buffer store for the stream
+			int bytes; // bytes returned from read()
+		 
+			while (true) {
+				try {
+					bytes = mmInStream.read(buffer);
+					connexionHandler.sendMessage(connexionHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer));
+				} catch (IOException e) {
+					break;
+				}
+			}
+		}
 
 		public void write(String message) { // Sert à envoyer une commande brute, sans traitement
 			try {
@@ -169,11 +328,5 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 				mmSocket.close(); // On ferme le socket
 			} catch (IOException e) { }
 		}
-	}
-
-	public void launchGame(View view)
-	{
-		connectedThread.write(String.valueOf(spinnerItem));
-		setContentView(R.layout.player_round);
 	}
 }

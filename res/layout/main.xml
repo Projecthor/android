@@ -11,29 +11,12 @@
 		android:textSize="18dp"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_marginBottom="15dp"
+		android:layout_marginBottom="30dp"
 		android:layout_gravity="center_horizontal"
 		/>
 	<Spinner
 		android:id="@+id/difficultySpinner"
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_marginBottom="30dp"
-		android:layout_gravity="center_horizontal"
-		/>
-	<TextView
-		android:text="Nombre de joueurs :"
-		android:textSize="18dp"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginBottom="15dp"
-		android:layout_gravity="center_horizontal"
-		/>
-	<EditText
-		android:id="@+id/playerNumberEditText"
-		android:numeric="integer"
-		android:text="1"
-		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginBottom="50dp"
 		android:layout_gravity="center_horizontal"

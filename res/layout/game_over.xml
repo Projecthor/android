@@ -29,21 +29,28 @@
 			android:layout_gravity="center_horizontal"
 			android:layout_marginBottom="50dp"
 			/>
-		<Button
-			android:id="@+id/replayButton"
-			android:text="Recommencer une partie"
+		<LinearLayout
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center_horizontal"
-			android:onClick="replay"
-			/>
-		<Button
-			android:id="@+id/quitButton"
-			android:text="Quitter"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:layout_gravity="center_horizontal"
-			android:onClick="quit"
-			/>
+			android:orientation="vertical"
+			>
+			<Button
+				android:id="@+id/replayButton"
+				android:text="Recommencer une partie"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_horizontal"
+				android:onClick="replay"
+				/>
+			<Button
+				android:id="@+id/quitButton"
+				android:text="Quitter"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_horizontal"
+				android:onClick="quit"
+				/>
+		</LinearLayout>
 	</LinearLayout>
 </RelativeLayout>

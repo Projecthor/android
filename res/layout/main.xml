@@ -18,7 +18,22 @@
 		android:id="@+id/difficultySpinner"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:layout_marginBottom="50dp"
+		android:layout_marginBottom="30dp"
+		android:layout_gravity="center_horizontal"
+		/>
+	<TextView
+		android:text="Nombre de manches :"
+		android:textSize="18dp"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="30dp"
+		android:layout_gravity="center_horizontal"
+		/>
+	<NumberPicker
+		android:id="@+id/shotsNumberPicker"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="30dp"
 		android:layout_gravity="center_horizontal"
 		/>
 	<Button

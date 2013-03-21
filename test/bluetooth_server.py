@@ -22,14 +22,14 @@ cont=True
 while cont :
 	data = client_sock.recv(1024)
 	print data
-	if data == "Compute":
+	if data == "c":
 		print "Order to compute"
-		client_sock.sendall( "ready" )
-	elif data == "Fire":
+		client_sock.sendall("ready")
+	elif data == "f":
 		print "Order to fire"
 		score = rd.randint(0,100)
 		client_sock.sendall( str(score) )
-	elif data == "Quit":
+	elif data == "e":
 		print "Exiting"
 		cont = False
 	else:

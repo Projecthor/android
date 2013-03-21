@@ -48,13 +48,14 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 	private TextView winLoseTextView;
 	private TextView finalScoreTextView;
 	private Spinner difficultySpinner;
+	private NumberPicker shotsNumberPicker;
 	private NumberPicker playerScoreNumberPicker;
 	private Button reconnectButton;
 
 	private long difficultyID;
 	private int playerScore;
 	private int robotScore;
-	private int remainingShots = 3;
+	private int remainingShots;
 
 
 
@@ -95,6 +96,11 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
 	public void displayMain() {
 		setContentView(R.layout.main);
+
+		shotsNumberPicker = (NumberPicker)findViewById(R.id.shotsNumberPicker);
+		shotsNumberPicker.setValue(3);
+		shotsNumberPicker.setMinValue(1);
+		shotsNumberPicker.setMaxValue(100);
 
 		difficultySpinner = (Spinner)findViewById(R.id.difficultySpinner);
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.difficultyArray, android.R.layout.simple_spinner_item);
@@ -203,6 +209,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
 	public void launchGame(View view) {
 		connectedThread.write(String.valueOf(difficultyID)); // On envoie le niveau de difficulté
+		remainingShots = shotsNumberPicker.getValue();
 		displayPlayerRound();
 	}
 

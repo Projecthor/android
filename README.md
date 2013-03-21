@@ -1,6 +1,6 @@
 Description
 ========================
-Ce programme est une interface android servant à contrôler notre robot dans le cadre de notre TPE si de première.
+Ce programme est une interface android servant à contrôler notre robot dans le cadre de notre TPE SI de première.
 
 Licence
 ========================

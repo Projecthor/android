@@ -31,7 +31,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 	// Constantes
 
 	private static final int SUCCEEDED = 1, FAILED = 0, MESSAGE_READ = 2;
-	private static final String DEVICE_NAME = "Prjecthr01"; // Le nom du périphérique bluetooth
+	private static final String DEVICE_NAME = "ArchYvon"; // Le nom du périphérique bluetooth
 	private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // Sert à identifier l'application lors de la connexion bluetooth
 
 	// Bluetooth

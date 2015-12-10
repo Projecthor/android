@@ -51,6 +51,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 	private NumberPicker shotsNumberPicker;
 	private NumberPicker playerScoreNumberPicker;
 	private Button reconnectButton;
+	private Button fireButton;
 
 	private long difficultyID;
 	private int playerScore;
@@ -74,11 +75,18 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 		if(!bluetoothAdapter.isEnabled()) { // On l'active si ce n'est pas déjà fait
 			bluetoothAdapter.enable();
 			while(!bluetoothAdapter.isEnabled()) { }
+			Toast.makeText(this, "Bluetooth activé", Toast.LENGTH_SHORT).show();
 		}
 
 		launchConnexion();
 	}
 
+	// On quitte lors de l'appui sur le bouton système "Précédent"
+
+	public void onBackPressed() {
+		exit();
+	}
+	
 	public void launchConnexion() {
 		Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices(); // On récupère la liste des périphériques bluetooth
 		for(BluetoothDevice device : pairedDevices) { // On cherche s'il y en a un qui correspond à celui qu'on cherche (DEVICE_NAME)
@@ -89,7 +97,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 			}
 		}
 	}
-	
+
 
 
 	// Afficher la vue main
@@ -159,6 +167,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 				String messageRead = new String(buffer, 0, msg.arg1);
 				if(messageRead.contains("r")) { // Si le robot est prêt à tirer
 					setContentView(R.layout.robot_round); // On change d'interface
+					fireButton = (Button)findViewById(R.id.fireButton);
 					refreshScore();
 				}
 				else { // Sinon le message est le score effectué par le robot
@@ -229,6 +238,7 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 
 	public void fire(View view) {
 		connectedThread.write("f"); // On envoie l'ordre de tirer
+		fireButton.setEnabled(false);
 	}
 
 	// Callback du bouton replayButton
@@ -243,11 +253,20 @@ public class MainActivity extends Activity implements OnItemSelectedListener {
 	// Callback du bouton quitButton
 
 	public void quit(View view) {
-		connectThread.cancel();
-		connectedThread.cancel();
-		finish();
+		exit();
 	}
 
+	// Coupe la connexion et quitte l'application
+
+	public void exit()
+	{
+		if(bluetoothAdapter.getState() == BluetoothAdapter.STATE_ON)
+		{
+			connectThread.cancel();
+			connectedThread.cancel();
+		}
+		finish();
+	}
 
 
 	// Thread de connexion
